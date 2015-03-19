@@ -97,10 +97,6 @@ var rectData = f32.Bytes(binary.LittleEndian,
 	0, 0.1,
 	0.1, 0,
 	0.1, 0.1,
-	// -0.05, -0.05,
-	// 0.05, -0.05,
-	// -0.05, 0.05,
-	// 0.05, 0.05,
 )
 
 var hitData [numBeats][numTracks]bool
@@ -122,8 +118,8 @@ func draw() {
 		}
 	}
 
-	for i := 0; i < 12; i++ {
-		for j := 0; j < 8; j++ {
+	for i := 0; i < numBeats; i++ {
+		for j := 0; j < numTracks; j++ {
 			var c float32
 			switch {
 			case hitData[i][j]:
@@ -133,7 +129,7 @@ func draw() {
 			default:
 				c = 0
 			}
-			drawButton(c, float32(i)*1/12, float32(j)*1/8)
+			drawButton(c, float32(i)*1/numBeats, float32(j)*1/numTracks)
 		}
 	}
 
