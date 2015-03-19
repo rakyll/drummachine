@@ -108,14 +108,14 @@ func draw() {
 
 	if greenDec {
 		green -= 0.01
-		if green <= 0.2 {
-			greenDec = false
-		}
 	} else {
 		green += 0.01
-		if green >= 0.5 {
-			greenDec = true
-		}
+	}
+	if green <= 0.2 {
+		greenDec = false
+	}
+	if green >= 0.5 {
+		greenDec = true
 	}
 
 	for i := 0; i < numBeats; i++ {
