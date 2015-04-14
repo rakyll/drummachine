@@ -53,9 +53,9 @@ func start() {
 		return
 	}
 
-	buf = gl.GenBuffer()
+	buf = gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, buf)
-	gl.BufferData(gl.ARRAY_BUFFER, gl.STATIC_DRAW, rectData)
+	gl.BufferData(gl.ARRAY_BUFFER, rectData, gl.STATIC_DRAW)
 
 	position = gl.GetAttribLocation(program, "position")
 	color = gl.GetUniformLocation(program, "color")
