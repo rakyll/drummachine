@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"golang.org/x/mobile/app"
+	"golang.org/x/mobile/audio"
 	"golang.org/x/mobile/event"
 	"golang.org/x/mobile/f32"
 	"golang.org/x/mobile/geom"
@@ -19,7 +20,7 @@ import (
 )
 
 const (
-	numBeats  = 12
+	numBeats  = 8
 	numTracks = 8
 )
 
@@ -60,26 +61,50 @@ func start() {
 	position = gl.GetAttribLocation(program, "position")
 	color = gl.GetUniformLocation(program, "color")
 	offset = gl.GetUniformLocation(program, "offset")
-	// touchLoc = geom.Point{geom.Width / 2, geom.Height / 2}
-	//
+
+	for i := 0; i < numTracks; i++ {
+		rc, err := app.Open(fmt.Sprintf("track%d.wav", i))
+		if err != nil {
+			log.Fatal(err)
+		}
+		p, err := audio.NewPlayer(rc, audio.Stereo16, 44100)
+		if err != nil {
+			log.Fatal(err)
+		}
+		players[i] = p
+	}
 
 	go func() {
 		for {
 			index = (index + 1) % numBeats
+			for t := 0; t < numTracks; t++ {
+				go func(t int) {
+					if hitData[index][t] {
+						players[t].Play()
+					}
+				}(t)
+			}
 			time.Sleep(300 * time.Millisecond)
 		}
 	}()
 
-	hitData[0][3] = true
-	hitData[0][6] = true
-	hitData[3][3] = true
+	// hi hat
+	hitData[0][1] = true
+	hitData[2][1] = true
+	hitData[4][1] = true
+	hitData[6][1] = true
 
+	// kick
+	hitData[5][2] = true
+	hitData[7][2] = true
+
+	// bass
 	hitData[0][4] = true
 	hitData[2][4] = true
 	hitData[4][4] = true
 	hitData[6][4] = true
-	hitData[8][4] = true
-	hitData[10][4] = true
+	// hitData[8][4] = true
+	// hitData[10][4] = true
 }
 
 func stop() {
@@ -89,7 +114,6 @@ func stop() {
 
 func touch(t event.Touch) {
 	touchLoc = t.Loc
-	fmt.Println(t)
 }
 
 var rectData = f32.Bytes(binary.LittleEndian,
@@ -100,6 +124,7 @@ var rectData = f32.Bytes(binary.LittleEndian,
 )
 
 var hitData [numBeats][numTracks]bool
+var players [numTracks]*audio.Player
 
 func draw() {
 	gl.ClearColor(0, 0, 0, 1)
@@ -132,8 +157,6 @@ func draw() {
 			drawButton(c, float32(i)*1/numBeats, float32(j)*1/numTracks)
 		}
 	}
-
-	//debug.DrawFPS()
 }
 
 func drawButton(g, x, y float32) {
