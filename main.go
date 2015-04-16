@@ -84,7 +84,7 @@ func start() {
 					}
 				}(t)
 			}
-			time.Sleep(300 * time.Millisecond)
+			time.Sleep(400 * time.Millisecond)
 		}
 	}()
 
@@ -103,8 +103,11 @@ func start() {
 	hitData[2][4] = true
 	hitData[4][4] = true
 	hitData[6][4] = true
-	// hitData[8][4] = true
-	// hitData[10][4] = true
+
+	// bass2
+	hitData[2][6] = true
+
+	hitData[4][7] = true
 }
 
 func stop() {
