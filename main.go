@@ -33,7 +33,7 @@ var (
 	green    float32
 	greenDec bool
 
-	started bool
+	stopped bool
 )
 
 func main() {
@@ -59,11 +59,6 @@ func start() {
 	position = gl.GetAttribLocation(program, "position")
 	color = gl.GetUniformLocation(program, "color")
 	offset = gl.GetUniformLocation(program, "offset")
-
-	if started {
-		return
-	}
-	started = true
 
 	for i := 0; i < numTracks; i++ {
 		rc, err := app.Open(fmt.Sprintf("track%d.wav", i))
@@ -101,6 +96,10 @@ func start() {
 
 	go func() {
 		for {
+			if stopped {
+				stopped = false
+				return
+			}
 			index = (index + 1) % numBeats
 			for t := 0; t < numTracks; t++ {
 				go func(t int) {
@@ -116,10 +115,11 @@ func start() {
 
 func stop() {
 	for _, p := range players {
-		p.Stop()
+		p.Destroy()
 	}
 	gl.DeleteProgram(program)
 	gl.DeleteBuffer(buf)
+	stopped = true
 	// TODO(jbd): Destroy the players, close the assets.
 }
 
