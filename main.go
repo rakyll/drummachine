@@ -35,6 +35,8 @@ var (
 	green    float32
 	greenDec bool
 	touchLoc geom.Point
+
+	started bool
 )
 
 func main() {
@@ -62,11 +64,17 @@ func start() {
 	color = gl.GetUniformLocation(program, "color")
 	offset = gl.GetUniformLocation(program, "offset")
 
+	if started {
+		return
+	}
+	started = true
+
 	for i := 0; i < numTracks; i++ {
 		rc, err := app.Open(fmt.Sprintf("track%d.wav", i))
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		p, err := audio.NewPlayer(rc, audio.Stereo16, 44100)
 		if err != nil {
 			log.Fatal(err)
@@ -111,6 +119,9 @@ func start() {
 }
 
 func stop() {
+	for _, p := range players {
+		p.Stop()
+	}
 	gl.DeleteProgram(program)
 	gl.DeleteBuffer(buf)
 }
