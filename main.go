@@ -12,9 +12,7 @@ import (
 
 	"golang.org/x/mobile/app"
 	"golang.org/x/mobile/audio"
-	"golang.org/x/mobile/event"
 	"golang.org/x/mobile/f32"
-	"golang.org/x/mobile/geom"
 	"golang.org/x/mobile/gl"
 	"golang.org/x/mobile/gl/glutil"
 )
@@ -34,7 +32,6 @@ var (
 	index    int
 	green    float32
 	greenDec bool
-	touchLoc geom.Point
 
 	started bool
 )
@@ -44,7 +41,6 @@ func main() {
 		Start: start,
 		Stop:  stop,
 		Draw:  draw,
-		Touch: touch,
 	})
 }
 
@@ -124,11 +120,7 @@ func stop() {
 	}
 	gl.DeleteProgram(program)
 	gl.DeleteBuffer(buf)
-}
-
-func touch(t event.Touch) {
-	// TODO(jbd): Turn on/off the hits based on the touch location.
-	touchLoc = t.Loc
+	// TODO(jbd): Destroy the players, close the assets.
 }
 
 var rectData = f32.Bytes(binary.LittleEndian,
