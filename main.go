@@ -127,6 +127,7 @@ func stop() {
 }
 
 func touch(t event.Touch) {
+	// TODO(jbd): Turn on/off the hits based on the touch location.
 	touchLoc = t.Loc
 }
 
