@@ -9,7 +9,7 @@
   <application android:label="Drum machine" android:hasCode="false" android:debuggable="true">
   <activity android:name="android.app.NativeActivity"
     android:label="Drums"
-    android:configChanges="orientation|keyboardHidden"
+    android:configChanges="orientation|screenSize"
     android:screenOrientation="landscape">
     <meta-data android:name="android.app.lib_name" android:value="drummachine" />
     <intent-filter>
