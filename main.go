@@ -74,12 +74,33 @@ func start() {
 		players[i] = p
 	}
 
+	// hi hat
+	hits[0][1] = true
+	hits[2][1] = true
+	hits[4][1] = true
+	hits[6][1] = true
+
+	// kick
+	hits[5][2] = true
+	hits[7][2] = true
+
+	// bass
+	hits[0][4] = true
+	hits[3][4] = true
+	hits[5][4] = true
+	hits[6][4] = true
+
+	// bass2
+	hits[2][6] = true
+
+	hits[4][7] = true
+
 	go func() {
 		for {
 			index = (index + 1) % numBeats
 			for t := 0; t < numTracks; t++ {
 				go func(t int) {
-					if hitData[index][t] {
+					if hits[index][t] {
 						players[t].Play()
 					}
 				}(t)
@@ -87,27 +108,6 @@ func start() {
 			time.Sleep(400 * time.Millisecond)
 		}
 	}()
-
-	// hi hat
-	hitData[0][1] = true
-	hitData[2][1] = true
-	hitData[4][1] = true
-	hitData[6][1] = true
-
-	// kick
-	hitData[5][2] = true
-	hitData[7][2] = true
-
-	// bass
-	hitData[0][4] = true
-	hitData[2][4] = true
-	hitData[4][4] = true
-	hitData[6][4] = true
-
-	// bass2
-	hitData[2][6] = true
-
-	hitData[4][7] = true
 }
 
 func stop() {
@@ -126,8 +126,10 @@ var rectData = f32.Bytes(binary.LittleEndian,
 	0.1, 0.1,
 )
 
-var hitData [numBeats][numTracks]bool
-var players [numTracks]*audio.Player
+var (
+	hits    [numBeats][numTracks]bool
+	players [numTracks]*audio.Player
+)
 
 func draw() {
 	gl.ClearColor(0, 0, 0, 1)
@@ -150,7 +152,7 @@ func draw() {
 		for j := 0; j < numTracks; j++ {
 			var c float32
 			switch {
-			case hitData[i][j]:
+			case hits[i][j]:
 				c = 1
 			case i == index:
 				c = green
