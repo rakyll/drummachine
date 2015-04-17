@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	numBeats  = 8
+	numBeats  = 16
 	numTracks = 8
 )
 
@@ -78,21 +78,34 @@ func start() {
 	hits[2][1] = true
 	hits[4][1] = true
 	hits[6][1] = true
+	hits[8][1] = true
+	hits[10][1] = true
+	hits[12][1] = true
+	hits[14][1] = true
 
 	// kick
 	hits[5][2] = true
 	hits[7][2] = true
+	hits[11][2] = true
+	hits[13][2] = true
+	hits[15][2] = true
 
 	// bass
 	hits[0][4] = true
 	hits[3][4] = true
 	hits[5][4] = true
 	hits[6][4] = true
+	hits[8][4] = true
+	hits[11][4] = true
+	hits[13][4] = true
 
 	// bass2
 	hits[2][6] = true
+	hits[10][6] = true
 
 	hits[4][7] = true
+	hits[12][7] = true
+	hits[14][7] = true
 
 	go func() {
 		for {
