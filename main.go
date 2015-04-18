@@ -118,7 +118,8 @@ func start() {
 					}
 				}(t)
 			}
-			time.Sleep(400 * time.Millisecond)
+			// bpm=140
+			time.Sleep(time.Minute / 140)
 		}
 	}()
 }
