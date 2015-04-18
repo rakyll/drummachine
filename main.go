@@ -88,6 +88,7 @@ func start() {
 	hits[7][2] = true
 	hits[11][2] = true
 	hits[13][2] = true
+	hits[14][2] = true
 	hits[15][2] = true
 
 	// bass
@@ -102,10 +103,6 @@ func start() {
 	// bass2
 	hits[2][6] = true
 	hits[10][6] = true
-
-	hits[4][7] = true
-	hits[12][7] = true
-	hits[14][7] = true
 
 	go func() {
 		for {
