@@ -141,7 +141,6 @@ func stop() {
 	gl.DeleteProgram(program)
 	gl.DeleteBuffer(buf)
 	stopped = true
-	// TODO(jbd): Destroy the players, close the assets.
 }
 
 var rectData = f32.Bytes(binary.LittleEndian,
