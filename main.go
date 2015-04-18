@@ -44,6 +44,7 @@ var (
 )
 
 func main() {
+	// TODO(jbd): Handle touch to turn on/off the beats.
 	app.Run(app.Callbacks{
 		Start: start,
 		Stop:  stop,
