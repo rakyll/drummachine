@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
+	"io"
 	"log"
 	"time"
 
@@ -34,6 +35,12 @@ var (
 	greenDec bool
 
 	stopped bool
+)
+
+var (
+	hits    [numBeats][numTracks]bool
+	samples [numTracks]io.Closer
+	players [numTracks]*audio.Player
 )
 
 func main() {
@@ -65,7 +72,7 @@ func start() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
+		samples[i] = rc
 		p, err := audio.NewPlayer(rc, audio.Stereo16, 44100)
 		if err != nil {
 			log.Fatal(err)
@@ -128,6 +135,9 @@ func stop() {
 	for _, p := range players {
 		p.Destroy()
 	}
+	for _, s := range samples {
+		s.Close()
+	}
 	gl.DeleteProgram(program)
 	gl.DeleteBuffer(buf)
 	stopped = true
@@ -139,11 +149,6 @@ var rectData = f32.Bytes(binary.LittleEndian,
 	0, 0.1,
 	0.1, 0,
 	0.1, 0.1,
-)
-
-var (
-	hits    [numBeats][numTracks]bool
-	players [numTracks]*audio.Player
 )
 
 func draw() {
