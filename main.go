@@ -13,7 +13,9 @@ import (
 
 	"golang.org/x/mobile/app"
 	"golang.org/x/mobile/audio"
+	"golang.org/x/mobile/event"
 	"golang.org/x/mobile/f32"
+	"golang.org/x/mobile/geom"
 	"golang.org/x/mobile/gl"
 	"golang.org/x/mobile/gl/glutil"
 )
@@ -49,7 +51,19 @@ func main() {
 		Start: start,
 		Stop:  stop,
 		Draw:  draw,
+		Touch: touch,
 	})
+}
+
+func touch(t event.Touch) {
+	// TODO(jbd): fix the vertex shader or the vertices,
+	// the touches have to be slightly at the bottom region
+	// of a particular button.
+	if t.Type == event.TouchStart {
+		x := int((t.Loc.X / geom.Width) * numBeats)
+		y := int((t.Loc.Y / geom.Height) * numTracks)
+		hits[x][y] = !hits[x][y]
+	}
 }
 
 func start() {
