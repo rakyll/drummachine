@@ -204,7 +204,7 @@ func start() {
 
 func stop() {
 	for _, p := range players {
-		p.Destroy()
+		p.Close()
 	}
 	for _, s := range samples {
 		s.Close()
