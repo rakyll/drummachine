@@ -180,6 +180,8 @@ func draw() {
 			drawButton(i, j)
 		}
 	}
+
+	drawBrandModel()
 	eng.Render(board, now)
 }
 
@@ -193,6 +195,15 @@ func drawButton(i, j int) {
 	eng.SetTransform(n, f32.Affine{
 		{buttonW, 0, float32(offsetX + i*(buttonW+10))},
 		{0, buttonH, float32(offsetY + j*(buttonW+10))},
+	})
+}
+
+func drawBrandModel() {
+	n := newNode()
+	eng.SetSubTex(n, texs[texBrand])
+	eng.SetTransform(n, f32.Affine{
+		{113, 0, offsetX},
+		{0, 44, 260},
 	})
 }
 
@@ -229,7 +240,7 @@ func loadTextures() []sprite.SubTex {
 	}
 
 	return []sprite.SubTex{
-		texBG:        sprite.SubTex{t, image.Rect(0, 0, 26, 860)},
+		texBG:        sprite.SubTex{t, image.Rect(0, 0, 24, 860)},
 		texButtonOff: sprite.SubTex{t, image.Rect(94, 242, 94+150, 242+151)},
 		texButtonOn:  sprite.SubTex{t, image.Rect(94, 413, 94+150, 413+151)},
 		texBrand:     sprite.SubTex{t, image.Rect(94, 31, 94+227, 31+88)},
