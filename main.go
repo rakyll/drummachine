@@ -91,7 +91,8 @@ var (
 
 var (
 	buttons [4][4]bool
-	pattern [16][16]bool
+	pattern [8][16]bool
+	index   int
 
 	samples [16]io.Closer
 	players [16]*audio.Player
@@ -117,12 +118,9 @@ func touch(t event.Touch) {
 		return
 	}
 	if t.Type == event.TouchStart {
-		buttons[i][j] = true
+		glow(i, j)
+		pattern[index][i*4+j] = true
 	}
-	go func() {
-		time.Sleep(400 * time.Millisecond)
-		buttons[i][j] = false
-	}()
 }
 
 func start() {
@@ -144,14 +142,28 @@ func start() {
 		for {
 			for i := 0; i < 4; i++ {
 				for j := 0; j < 4; j++ {
-					if buttons[i][j] {
-						players[i*4+j].Play()
+					if pattern[index][i*4+j] {
+						glow(i, j)
 					}
 				}
 			}
 			// bpm=140
 			time.Sleep(time.Minute / 140)
+			index = (index + 1) % len(pattern)
 		}
+	}()
+}
+
+// TODO(jbd): racy glow, do we have to care?
+
+func glow(i, j int) {
+	p := players[i*4+j]
+	buttons[i][j] = true
+	p.Seek(0)
+	p.Play()
+	go func() {
+		time.Sleep(300 * time.Millisecond)
+		buttons[i][j] = false
 	}()
 }
 
