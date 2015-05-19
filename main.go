@@ -61,44 +61,38 @@
 package main
 
 import (
-	"encoding/binary"
-	"fmt"
+	"image"
 	"io"
 	"log"
 	"time"
+
+	_ "image/jpeg"
 
 	"golang.org/x/mobile/app"
 	"golang.org/x/mobile/audio"
 	"golang.org/x/mobile/event"
 	"golang.org/x/mobile/f32"
-	"golang.org/x/mobile/geom"
 	"golang.org/x/mobile/gl"
-	"golang.org/x/mobile/gl/glutil"
-)
-
-const (
-	numBeats  = 16
-	numTracks = 8
+	"golang.org/x/mobile/sprite"
+	"golang.org/x/mobile/sprite/clock"
+	"golang.org/x/mobile/sprite/glsprite"
 )
 
 var (
-	program  gl.Program
-	position gl.Attrib
-	offset   gl.Uniform
-	color    gl.Uniform
-	buf      gl.Buffer
+	startClock = time.Now()
+	lastClock  = clock.Time(-1)
+	eng        = glsprite.Engine()
 
-	index    int
-	green    float32
-	greenDec bool
+	texs []sprite.SubTex
 
-	stopped bool
+	board *sprite.Node
 )
 
+const numDrums = 6
+
 var (
-	hits    [numBeats][numTracks]bool
-	samples [numTracks]io.Closer
-	players [numTracks]*audio.Player
+	samples [numDrums]io.Closer
+	players [numDrums]*audio.Player
 )
 
 func main() {
@@ -112,94 +106,23 @@ func main() {
 }
 
 func touch(t event.Touch) {
-	// TODO(jbd): fix the vertex shader or the vertices,
-	// the touches have to be slightly at the bottom region
-	// of a particular button.
-	if t.Type == event.TouchStart {
-		x := int((t.Loc.X / geom.Width) * numBeats)
-		y := int((t.Loc.Y / geom.Height) * numTracks)
-		hits[x][y] = !hits[x][y]
+	x, y := float32(t.Loc.X), float32(t.Loc.Y)
+	i := int((x - offsetX) / (buttonW + 10))
+	j := int((y - offsetY) / (buttonH + 10))
+	if i < 0 || i > 4 || j < 0 || j > 4 {
+		return
 	}
+	if t.Type == event.TouchStart {
+		buttons[i][j] = true
+	}
+	go func() {
+		time.Sleep(300 * time.Millisecond)
+		buttons[i][j] = false
+	}()
 }
 
 func start() {
-	var err error
-	program, err = glutil.CreateProgram(vertexShader, fragmentShader)
-	if err != nil {
-		log.Printf("error creating GL program: %v", err)
-		return
-	}
 
-	buf = gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, buf)
-	gl.BufferData(gl.ARRAY_BUFFER, rectData, gl.STATIC_DRAW)
-
-	position = gl.GetAttribLocation(program, "position")
-	color = gl.GetUniformLocation(program, "color")
-	offset = gl.GetUniformLocation(program, "offset")
-
-	for i := 0; i < numTracks; i++ {
-		rc, err := app.Open(fmt.Sprintf("track%d.wav", i))
-		if err != nil {
-			log.Fatal(err)
-		}
-		samples[i] = rc
-		p, err := audio.NewPlayer(rc, audio.Stereo16, 44100)
-		if err != nil {
-			log.Fatal(err)
-		}
-		players[i] = p
-	}
-
-	// hi hat
-	hits[0][1] = true
-	hits[2][1] = true
-	hits[4][1] = true
-	hits[6][1] = true
-	hits[8][1] = true
-	hits[10][1] = true
-	hits[12][1] = true
-	hits[14][1] = true
-
-	// kick
-	hits[5][2] = true
-	hits[7][2] = true
-	hits[11][2] = true
-	hits[13][2] = true
-	hits[14][2] = true
-	hits[15][2] = true
-
-	// bass
-	hits[0][4] = true
-	hits[3][4] = true
-	hits[5][4] = true
-	hits[6][4] = true
-	hits[8][4] = true
-	hits[11][4] = true
-	hits[13][4] = true
-
-	// bass2
-	hits[2][6] = true
-	hits[10][6] = true
-
-	go func() {
-		for {
-			if stopped {
-				stopped = false
-				return
-			}
-			index = (index + 1) % numBeats
-			for t := 0; t < numTracks; t++ {
-				go func(t int) {
-					if hits[index][t] {
-						players[t].Play()
-					}
-				}(t)
-			}
-			// bpm=140
-			time.Sleep(time.Minute / 140)
-		}
-	}()
 }
 
 func stop() {
@@ -209,75 +132,106 @@ func stop() {
 	for _, s := range samples {
 		s.Close()
 	}
-	gl.DeleteProgram(program)
-	gl.DeleteBuffer(buf)
-	stopped = true
 }
 
-var rectData = f32.Bytes(binary.LittleEndian,
-	0, 0,
-	0, 0.1,
-	0.1, 0,
-	0.1, 0.1,
+const (
+	offsetX = 20
+	offsetY = 20
+	buttonW = 50
+	buttonH = 50
 )
 
+var buttons [4][4]bool
+
 func draw() {
-	gl.ClearColor(0, 0, 0, 1)
+	if texs == nil {
+		texs = loadTextures()
+	}
+
+	now := clock.Time(time.Since(startClock) * 60 / time.Second)
+	if now == lastClock {
+		// TODO: figure out how to limit draw callbacks to 60Hz instead of
+		// burning the CPU as fast as possible.
+		// TODO: (relatedly??) sync to vblank?
+		return
+	}
+	lastClock = now
+	gl.ClearColor(1, 1, 1, 1)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
-	gl.UseProgram(program)
 
-	if greenDec {
-		green -= 0.01
-	} else {
-		green += 0.01
-	}
-	if green <= 0.2 {
-		greenDec = false
-	}
-	if green >= 0.5 {
-		greenDec = true
-	}
+	cfg := app.GetConfig()
+	board = &sprite.Node{}
+	eng.Register(board)
+	eng.SetTransform(board, f32.Affine{
+		{1, 0, 0},
+		{0, 1, 0},
+	})
 
-	for i := 0; i < numBeats; i++ {
-		for j := 0; j < numTracks; j++ {
-			var c float32
-			switch {
-			case hits[i][j]:
-				c = 1
-			case i == index:
-				c = green
-			default:
-				c = 0
-			}
-			drawButton(c, float32(i)*1/numBeats, float32(j)*1/numTracks)
+	n := newNode()
+	eng.SetSubTex(n, texs[texBG])
+	eng.SetTransform(n, f32.Affine{
+		{float32(cfg.Width), 0, 0},
+		{0, float32(cfg.Height), 0},
+	})
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 4; j++ {
+			drawButton(i, j)
 		}
 	}
+	eng.Render(board, now)
 }
 
-func drawButton(g, x, y float32) {
-	gl.Uniform4f(color, 0.1, g, 0.4, 1) // color
-	gl.Uniform2f(offset, x, y)          // position
-
-	gl.BindBuffer(gl.ARRAY_BUFFER, buf)
-	gl.EnableVertexAttribArray(position)
-	gl.VertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0)
-	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
-	gl.DisableVertexAttribArray(position)
+func drawButton(i, j int) {
+	n := newNode()
+	if buttons[i][j] {
+		eng.SetSubTex(n, texs[texButtonOn])
+	} else {
+		eng.SetSubTex(n, texs[texButtonOff])
+	}
+	eng.SetTransform(n, f32.Affine{
+		{buttonW, 0, float32(offsetX + i*(buttonW+10))},
+		{0, buttonH, float32(offsetY + j*(buttonW+10))},
+	})
 }
 
-const vertexShader = `#version 100
-uniform vec2 offset;
-attribute vec4 position;
-void main() {
-  // offset comes in with x/y values between 0 and 1.
-  // position bounds are -1 to 1.
-  vec4 offset4 = vec4(2.0*offset.x-1.0, 1.0-2.0*offset.y, 0, 0);
-  gl_Position = position + offset4;
-}`
+func newNode() *sprite.Node {
+	n := &sprite.Node{}
+	eng.Register(n)
+	board.AppendChild(n)
+	return n
+}
 
-const fragmentShader = `#version 100
-precision mediump float;
-uniform vec4 color;
-void main() {
-  gl_FragColor = color;
-}`
+const (
+	texBG = iota
+	texButtonOn
+	texButtonOff
+	texBrand
+	texModel
+	texOthers
+)
+
+func loadTextures() []sprite.SubTex {
+	a, err := app.Open("sprite.jpg")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer a.Close()
+
+	img, _, err := image.Decode(a)
+	if err != nil {
+		log.Fatal(err)
+	}
+	t, err := eng.LoadTexture(img)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return []sprite.SubTex{
+		texBG:        sprite.SubTex{t, image.Rect(0, 0, 26, 860)},
+		texButtonOff: sprite.SubTex{t, image.Rect(94, 242, 94+150, 242+151)},
+		texButtonOn:  sprite.SubTex{t, image.Rect(94, 413, 94+150, 413+151)},
+		texBrand:     sprite.SubTex{t, image.Rect(94, 31, 94+227, 31+88)},
+		texModel:     sprite.SubTex{t, image.Rect(162, 120, 162+140, 120+90)},
+		texOthers:    sprite.SubTex{t, image.Rect(162, 120, 162+140, 120+90)},
+	}
+}
