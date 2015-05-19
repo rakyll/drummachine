@@ -61,6 +61,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"io"
 	"log"
@@ -88,11 +89,12 @@ var (
 	board *sprite.Node
 )
 
-const numDrums = 6
-
 var (
-	samples [numDrums]io.Closer
-	players [numDrums]*audio.Player
+	buttons [4][4]bool
+	pattern [16][16]bool
+
+	samples [16]io.Closer
+	players [16]*audio.Player
 )
 
 func main() {
@@ -105,6 +107,8 @@ func main() {
 	})
 }
 
+// TODO(jbd): Add multitouch.
+
 func touch(t event.Touch) {
 	x, y := float32(t.Loc.X), float32(t.Loc.Y)
 	i := int((x - offsetX) / (buttonW + 10))
@@ -116,13 +120,39 @@ func touch(t event.Touch) {
 		buttons[i][j] = true
 	}
 	go func() {
-		time.Sleep(300 * time.Millisecond)
+		time.Sleep(400 * time.Millisecond)
 		buttons[i][j] = false
 	}()
 }
 
 func start() {
+	for i := 0; i < len(samples); i++ {
+		src, err := app.Open(fmt.Sprintf("sample%d.wav", i))
+		if err != nil {
+			log.Fatal(err)
+		}
+		samples[i] = src
+		p, err := audio.NewPlayer(src, 0, 0)
+		if err != nil {
+			log.Fatal(err)
+		}
+		players[i] = p
+	}
 
+	// player goroutine
+	go func() {
+		for {
+			for i := 0; i < 4; i++ {
+				for j := 0; j < 4; j++ {
+					if buttons[i][j] {
+						players[i*4+j].Play()
+					}
+				}
+			}
+			// bpm=140
+			time.Sleep(time.Minute / 140)
+		}
+	}()
 }
 
 func stop() {
@@ -142,8 +172,6 @@ const (
 	buttonW = 50
 	buttonH = 50
 )
-
-var buttons [4][4]bool
 
 func draw() {
 	if texs == nil {
