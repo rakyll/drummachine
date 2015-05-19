@@ -109,7 +109,7 @@ func touch(t event.Touch) {
 	x, y := float32(t.Loc.X), float32(t.Loc.Y)
 	i := int((x - offsetX) / (buttonW + 10))
 	j := int((y - offsetY) / (buttonH + 10))
-	if i < 0 || i > 4 || j < 0 || j > 4 {
+	if i < 0 || i > 3 || j < 0 || j > 3 {
 		return
 	}
 	if t.Type == event.TouchStart {
