@@ -134,6 +134,8 @@ func stop() {
 	}
 }
 
+// TODO(jbd): Dynamically calculate the width and the height
+// depending on the size of the screen.
 const (
 	offsetX = 20
 	offsetY = 20
