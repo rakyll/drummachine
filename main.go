@@ -157,7 +157,7 @@ func start() {
 // TODO(jbd): racy glow, do we have to care?
 
 func glow(i, j int) {
-	p := players[i*4+j]
+	p := players[j*4+i]
 	buttons[i][j] = true
 	p.Seek(0)
 	p.Play()
