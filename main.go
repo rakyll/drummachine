@@ -112,8 +112,8 @@ func main() {
 
 func touch(t event.Touch) {
 	x, y := float32(t.Loc.X), float32(t.Loc.Y)
-	i := int((x - offsetX) / (buttonW + 10))
-	j := int((y - offsetY) / (buttonH + 10))
+	i := int((x - offset) / button)
+	j := int((y - offset) / button)
 	if i < 0 || i > 3 || j < 0 || j > 3 {
 		return
 	}
@@ -176,19 +176,21 @@ func stop() {
 	}
 }
 
-// TODO(jbd): Dynamically calculate the width and the height
-// depending on the size of the screen.
-const (
-	offsetX = 20
-	offsetY = 20
-	buttonW = 50
-	buttonH = 50
+// TODO(jbd): Should work in potrait mode.
+
+var (
+	offset float32
+	button float32
 )
 
 func draw() {
 	if texs == nil {
 		texs = loadTextures()
 	}
+
+	h := app.GetConfig().Height
+	button = float32(h / 5)
+	offset = button / 2
 
 	now := clock.Time(time.Since(startClock) * 60 / time.Second)
 	if now == lastClock {
@@ -233,8 +235,8 @@ func drawButton(i, j int) {
 		eng.SetSubTex(n, texs[texButtonOff])
 	}
 	eng.SetTransform(n, f32.Affine{
-		{buttonW, 0, float32(offsetX + i*(buttonW+10))},
-		{0, buttonH, float32(offsetY + j*(buttonW+10))},
+		{button, 0, offset + float32(i)*button},
+		{0, button, offset + float32(j)*button},
 	})
 }
 
@@ -242,8 +244,8 @@ func drawBrandModel() {
 	n := newNode()
 	eng.SetSubTex(n, texs[texBrand])
 	eng.SetTransform(n, f32.Affine{
-		{113, 0, offsetX},
-		{0, 44, 260},
+		{56, 0, 5 * button},
+		{0, 22, offset},
 	})
 }
 
