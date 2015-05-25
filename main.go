@@ -74,8 +74,6 @@ func main() {
 	})
 }
 
-// TODO(jbd): Add multitouch.
-
 func touch(t event.Touch) {
 	x, y := float32(t.Loc.X), float32(t.Loc.Y)
 	i := int((x - offset) / button)
