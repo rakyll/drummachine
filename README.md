@@ -1,6 +1,7 @@
 # drum machine
 
-This package contains a trivial drum machine program written in Go that can work on Android and your desktop.
+This package contains a trivial Akai MPD18 replica that runs on mobile
+devices and your desktop.
 
 ![Drum machine](http://i.imgur.com/x54b85v.jpg)
 
