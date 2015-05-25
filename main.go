@@ -5,45 +5,11 @@
 // A simple drum machine app.
 //
 // Note: This demo is an early preview of Go 1.5. In order to build this
-// program as an Android APK using the gomobile tool, you need to install
-// Go 1.5 from the source.
+// program as an Android APK using the gomobile tool.
 //
-// Clone the source from the tip under $HOME/go directory. On Windows,
-// you may like to clone the repo to your user folder, %USERPROFILE%\go.
+// See http://godoc.org/golang.org/x/mobile/cmd/gomobile to install gomobile.
 //
-//   $ git clone https://go.googlesource.com/go $HOME/go
-//
-// Go 1.5 requires Go 1.4. Read more about this requirement at
-// http://golang.org/s/go15bootstrap.
-// Set GOROOT_BOOTSTRAP to the GOROOT of your existing 1.4 installation or
-// follow the steps below to checkout go1.4 from the source and build.
-//
-//   $ git clone https://go.googlesource.com/go $HOME/go1.4
-//   $ cd $HOME/go1.4
-//   $ git checkout go1.4.1
-//   $ cd src && ./make.bash
-//
-// If you clone Go 1.4 to a different destination, set GOROOT_BOOTSTRAP
-// environmental variable accordingly.
-//
-// Build Go 1.5 and add Go 1.5 bin to your path.
-//
-//   $ cd $HOME/go/src && ./make.bash
-//   $ export PATH=$PATH:$HOME/go/bin
-//
-// Set a GOPATH if no GOPATH is set, add $GOPATH/bin to your path.
-//
-//   $ export GOPATH=$HOME
-//   $ export PATH=$PATH:$GOPATH/bin
-//
-// Get the gomobile tool and initialize.
-//
-//   $ go get golang.org/x/mobile/cmd/gomobile
-//   $ gomobile init
-//
-// It may take a while to initialize gomobile, please wait.
-//
-// Get the drum machine example and use gomobile to build or install it on your device.
+// Get the drummachine and use gomobile to build or install it on your device.
 //
 //   $ go get -d github.com/rakyll/drummachine
 //   $ gomobile build github.com/rakyll/drummachine # will build an APK
@@ -53,11 +19,11 @@
 //   # build and deploy the APK to an Android target.
 //   $ gomobile install github.com/rakyll/drummachine
 //
-// Switch to your device or emulator to start the Drum Machine application from
-// the launcher.
-// You can also run the application on your desktop by running the command
-// below. (Note: It currently doesn't work on Windows.)
+// Additionally, you can run the sample on your desktop environment
+// by using the go tool.
+//
 //   $ go install github.com/rakyll/drummachine && drummachine
+//
 package main
 
 import (
