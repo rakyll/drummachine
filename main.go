@@ -234,9 +234,10 @@ func drawButton(i, j int) {
 	} else {
 		eng.SetSubTex(n, texs[texButtonOff])
 	}
+	margin := button / 10
 	eng.SetTransform(n, f32.Affine{
-		{button, 0, offset + float32(i)*button},
-		{0, button, offset + float32(j)*button},
+		{button - margin, 0, offset + float32(i)*button},
+		{0, button - margin, offset + float32(j)*button},
 	})
 }
 
