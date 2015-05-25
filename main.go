@@ -284,8 +284,8 @@ func loadTextures() []sprite.SubTex {
 
 	return []sprite.SubTex{
 		texBG:        sprite.SubTex{t, image.Rect(0, 0, 24, 860)},
-		texButtonOff: sprite.SubTex{t, image.Rect(94, 242, 94+150, 242+151)},
-		texButtonOn:  sprite.SubTex{t, image.Rect(94, 413, 94+150, 413+151)},
+		texButtonOff: sprite.SubTex{t, image.Rect(95, 243, 95+149, 243+149)},
+		texButtonOn:  sprite.SubTex{t, image.Rect(95, 414, 95+149, 414+149)},
 		texBrand:     sprite.SubTex{t, image.Rect(94, 31, 94+227, 31+88)},
 		texModel:     sprite.SubTex{t, image.Rect(162, 120, 162+140, 120+90)},
 		texOthers:    sprite.SubTex{t, image.Rect(162, 120, 162+140, 120+90)},
